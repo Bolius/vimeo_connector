@@ -173,7 +173,7 @@ class Tx_VimeoConnector_SchedulerTask_Import extends tx_scheduler_Task {
 		}
 
 		if (!empty($deleteRecords)) {
-			$tce = t3lib_div::makeInstance('t3lib_TCEmain');
+			$tce = TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('t3lib_TCEmain');
 			$tce->start(array(), $deleteRecords);
 			$tce->process_cmdmap();
 		}
@@ -187,12 +187,15 @@ class Tx_VimeoConnector_SchedulerTask_Import extends tx_scheduler_Task {
 		if (!empty($video->thumbnails->thumbnail)) {
 			$thumbnail = end($video->thumbnails->thumbnail);
 
-			$thumbnailData = t3lib_div::getURL($thumbnail->_content);
-			$thumbnailPath = t3lib_div::getFileAbsFileName('uploads/tx_vimeoconnector');
+			$thumbnailData = TYPO3\CMS\Core\Utility\GeneralUtility::getUrl($thumbnail->_content);
+			$thumbnailPath = TYPO3\CMS\Core\Utility\GeneralUtility::getFileAbsFileName('uploads/tx_vimeoconnector');
+
 			preg_match('/\/([^\/]+)$/', $thumbnail->_content, $thumbnailUrlArray);
-			$thumbnailFileName = t3lib_div::makeInstance('t3lib_basicFileFunctions')
+			$thumbnailFileName = TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('t3lib_basicFileFunctions')
 				->getUniqueName(end($thumbnailUrlArray), $thumbnailPath);
-			$writingFileSucceeded = t3lib_div::writeFile($thumbnailFileName, $thumbnailData);
+
+			$writingFileSucceeded = TYPO3\CMS\Core\Utility\GeneralUtility::writeFile($thumbnailFileName, $thumbnailData);
+
 			return ($writingFileSucceeded ? basename($thumbnailFileName) : NULL);
 		}
 	}
@@ -226,8 +229,7 @@ class Tx_VimeoConnector_SchedulerTask_Import extends tx_scheduler_Task {
 	}
 
 	/**
-	 * parses the ext_conf
-	 * @return void
+	 * @throws Exception
 	 */
 	protected function resolveExtensionConfiguration() {
 		$extensionConfiguration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['vimeo_connector']);
