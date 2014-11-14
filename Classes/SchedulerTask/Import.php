@@ -111,6 +111,8 @@ class Tx_VimeoConnector_SchedulerTask_Import extends tx_scheduler_Task {
 	 * @return void
 	 */
 	protected function processVideos($videos) {
+		/** @var \TYPO3\CMS\Core\Database\DatabaseConnection $TYPO3_DB */
+		global $TYPO3_DB;
 		$tce = t3lib_div::makeInstance('t3lib_TCEmain');
 		$databaseRecord = array();
 		foreach ((array)$videos as $video) {
@@ -155,6 +157,14 @@ class Tx_VimeoConnector_SchedulerTask_Import extends tx_scheduler_Task {
 		if (!empty($databaseRecord)) {
 			$tce->start($databaseRecord, array());
 			$tce->process_datamap();
+		}
+
+		// Loop through all videos and update title IF it is empty
+		$select = $TYPO3_DB->exec_SELECTquery('uid,title','tx_vimeoconnector_domain_model_video','realurl_alias = ""');
+		while($row = $TYPO3_DB->sql_fetch_assoc($select)){
+			$TYPO3_DB->exec_UPDATEquery('tx_vimeoconnector_domain_model_video', 'uid = ' . $row['uid'], array(
+				'realurl_alias' => \Bolius\BoliusSetup\Utility\RealurlUtility::encodeTitle($row['title'] . '-' . $row['uid'])
+			));
 		}
 	}
 
