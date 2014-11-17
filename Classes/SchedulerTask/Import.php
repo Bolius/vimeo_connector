@@ -113,7 +113,9 @@ class Tx_VimeoConnector_SchedulerTask_Import extends tx_scheduler_Task {
 	protected function processVideos($videos) {
 		/** @var \TYPO3\CMS\Core\Database\DatabaseConnection $TYPO3_DB */
 		global $TYPO3_DB;
-		$tce = t3lib_div::makeInstance('t3lib_TCEmain');
+
+		$tce = TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('t3lib_TCEmain');
+
 		$databaseRecord = array();
 		foreach ((array)$videos as $video) {
 			$this->vimeoVideos[] = $video->id;
@@ -125,6 +127,7 @@ class Tx_VimeoConnector_SchedulerTask_Import extends tx_scheduler_Task {
 
 				// update existing record with new data
 			if (!empty($existingRecord[0]) && $existingRecord[0]['tstamp'] < $video->modified_date) {
+
 				$thumbnailFileName = $this->processThumbnail($video);
 
 				$databaseRecord['tx_vimeoconnector_domain_model_video'][intval($existingRecord['uid'])] = array(
@@ -138,6 +141,7 @@ class Tx_VimeoConnector_SchedulerTask_Import extends tx_scheduler_Task {
 
 				// insert new record
 			} elseif (empty($existingRecord)) {
+
 				$thumbnailFileName = $this->processThumbnail($video);
 
 				$databaseRecord['tx_vimeoconnector_domain_model_video']['NEW' . rand()] = array(
